@@ -3,21 +3,17 @@
  * Is not allowed to be disturb with arguments
  */
 async function calculateMeaningOfLive(...args) {
-  if (args.length > 0) {
-    throw new Error(`
-      Has been distrubed and lost track of calculation.
-      Please try again.
-    `)
-  }
+	if (args.length > 0) {
+		throw new Error(`Has been distrubed and lost track of calculation.Please try again.`);
+	}
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(42)
-    }, 2000)
-  })
+	return new Promise((resolve) => {
+		setTimeout(() => {
+			resolve(42);
+		}, 1000);
+	});
 }
-
 
 module.exports = {
-  calculateMeaningOfLive
-}
+	calculateMeaningOfLive
+};
