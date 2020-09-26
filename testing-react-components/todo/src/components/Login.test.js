@@ -11,9 +11,8 @@ describe('login form', () => {
 	test('should render the login form', () => {
 		const { getByLabelText, queryAllByText } = render(<Login />);
 
-		// expect(getByLabelText(/username/i)).toBeInDocument();
-		expect(getByLabelText(/username/i)).not.toBeNull();
-		expect(getByLabelText(/password/i)).not.toBeNull();
+		expect(getByLabelText(/username/i)).toBeInTheDocument();
+		expect(getByLabelText(/password/i)).toBeInTheDocument();
 		expect(queryAllByText(/login/i)).not.toBeNull();
 	});
 
