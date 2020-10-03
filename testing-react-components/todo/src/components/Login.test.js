@@ -3,60 +3,67 @@ import { Router } from 'react-router';
 import { createMemoryHistory } from 'history';
 
 import Login from './Login';
-import { fireEvent, render, wait } from '@testing-library/react';
+import { render as rtlRender, wait, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
 
 describe('login form', () => {
+	function render(ui, { route = '/', history = createMemoryHistory({ initialEntries: [route] }), ...renderOptions } = {}) {
+		function Wrapper({ children }) {
+			return <Router history={history}>{children}</Router>;
+		}
+		return rtlRender(ui, { wrapper: Wrapper, ...renderOptions });
+	}
 	test('should render the login form', () => {
-		const { getByLabelText, queryAllByText } = render(<Login />);
-
-		expect(getByLabelText(/username/i)).toBeInTheDocument();
-		expect(getByLabelText(/password/i)).toBeInTheDocument();
-		expect(queryAllByText(/login/i)).not.toBeNull();
+		render(<Login />);
+		expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+		expect(screen.queryAllByText(/login/i)).not.toBeNull();
 	});
 
-	// test('should disable login button upon click', async () => {
-	// 	const { queryAllByText, debug } = render(<Login />);
-	// 	const loginBtn = queryAllByText(/login/i)[1];
-
-	// 	fireEvent.click(loginBtn);
-	// 	expect(loginBtn).toBeDisabled();
-	// });
-
 	test('should show error upon bad input', async () => {
-		const { queryAllByText, getByLabelText, getByRole, debug } = render(<Login />);
-		const loginTextBox = getByLabelText(/username/i);
-		const passwordTextBox = getByLabelText(/password/i);
-		const loginBtn = queryAllByText(/login/i)[1];
+		render(<Login />);
+
+		const loginTextBox = screen.getByLabelText(/username/i);
+		const passwordTextBox = screen.getByLabelText(/password/i);
+		const loginBtn = screen.queryAllByText(/login/i)[1];
 
 		userEvent.type(loginTextBox, 'admin');
 		userEvent.type(passwordTextBox, 'adminoo');
+		userEvent.click(loginBtn);
 
-		fireEvent.click(loginBtn);
 		await wait(() => {
-			expect(getByRole('alert')).not.toBeNull();
+			expect(screen.getByText(/login failed/i)).toBeInTheDocument();
 		});
 	});
 
 	test('should redirect to the todo page upon success login', async () => {
 		const history = createMemoryHistory({ initialEntries: ['/'] });
-		const { queryAllByText, getByLabelText } = render(
-			<Router history={history}>
-				<Login />
-			</Router>
-		);
+		render(<Login />, { history });
 
-		const loginTextBox = getByLabelText(/username/i);
-		const passwordTextBox = getByLabelText(/password/i);
-		const loginBtn = queryAllByText(/login/i)[1];
+		const loginTextBox = screen.getByLabelText(/username/i);
+		const passwordTextBox = screen.getByLabelText(/password/i);
+		const loginBtn = screen.queryAllByText(/login/i)[1];
 
 		userEvent.type(loginTextBox, 'admin');
 		userEvent.type(passwordTextBox, 'admin');
-		fireEvent.click(loginBtn);
+		userEvent.click(loginBtn);
 
 		await wait(() => {
 			expect('/todo').toBe(history.location.pathname);
 		});
+	});
+
+	test('should disable button on save ', () => {
+		render(<Login />);
+
+		const loginTextBox = screen.getByLabelText(/username/i);
+		const passwordTextBox = screen.getByLabelText(/password/i);
+		const loginBtn = screen.queryAllByText(/login/i)[1];
+
+		userEvent.type(loginTextBox, 'admin');
+		userEvent.type(passwordTextBox, 'admin');
+		userEvent.click(loginBtn);
+
+		expect(loginBtn).toBeDisabled();
 	});
 });
